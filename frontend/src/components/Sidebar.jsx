@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Sidebar({ activeTab, setActiveTab, onNavigateHome }) {
   const navItems = [
     {
       id: 'dashboard',
@@ -41,7 +41,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   return (
     <aside className="ns-sidebar">
       {/* Brand Header */}
-      <div className="ns-brand">
+      <div className="ns-brand" onClick={onNavigateHome} style={{ cursor: 'pointer' }} title="Go to Home / Landing Page">
         <div className="ns-brand-logo">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d4844" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 12c2.5-3 5.5-3 8 0s5.5 3 8 0 5.5-3 8 0" />

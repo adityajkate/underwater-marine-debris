@@ -1,16 +1,37 @@
 import React, { useState } from 'react';
+import LandingPage from './components/LandingPage';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import ImageAnalysisWorkspace from './components/ImageAnalysisWorkspace';
 import './App.css';
 
 export default function App() {
+  const [currentPage, setCurrentPage] = useState('landing');
   const [activeTab, setActiveTab] = useState('image-analysis');
+
+  // Handler to open Image Analysis workspace from Landing Page or console
+  const handleNavigateToAnalysis = () => {
+    setCurrentPage('console');
+    setActiveTab('image-analysis');
+  };
+
+  // Handler to return to Landing Page
+  const handleNavigateHome = () => {
+    setCurrentPage('landing');
+  };
+
+  if (currentPage === 'landing') {
+    return <LandingPage onNavigateToAnalysis={handleNavigateToAnalysis} />;
+  }
 
   return (
     <div className="ns-app-layout">
       {/* Left Navigation Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onNavigateHome={handleNavigateHome}
+      />
 
       {/* Main Content Area */}
       <div className="ns-main-wrapper">
@@ -33,7 +54,7 @@ export default function App() {
                 type="button"
                 className="ns-btn ns-btn-primary"
                 style={{ marginTop: '24px' }}
-                onClick={() => setActiveTab('image-analysis')}
+                onClick={handleNavigateToAnalysis}
               >
                 Go to Image Analysis
               </button>
