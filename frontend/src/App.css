@@ -37,7 +37,7 @@
 }
 
 .ns-brand-title {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--ns-text-title);
   letter-spacing: -0.2px;
@@ -54,14 +54,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 11px 16px;
   border-radius: 24px;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 500;
   color: var(--ns-text-body);
   transition: all 0.15s ease-in-out;
   text-align: left;
   width: 100%;
+  line-height: 1.4;
 }
 
 .ns-nav-item:hover {
@@ -100,14 +101,14 @@
 
 .ns-console-tag {
   font-family: var(--ns-font-mono);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.8px;
   color: var(--ns-text-muted);
   background: var(--ns-bg-sidebar);
   border: 1px solid var(--ns-border);
   border-radius: 6px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -167,28 +168,29 @@
 }
 
 .ns-page-title {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--ns-text-title);
   letter-spacing: -0.3px;
 }
 
 .ns-page-subtitle {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ns-text-muted);
-  margin-top: 4px;
+  margin-top: 6px;
+  line-height: 1.5;
 }
 
 .ns-history-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 9px 18px;
   border: 1px solid var(--ns-border);
   border-radius: 8px;
   background-color: var(--ns-bg-card);
   color: var(--ns-text-title);
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s, border-color 0.2s;
 }
@@ -241,16 +243,17 @@
 }
 
 .ns-dropzone-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--ns-text-title);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .ns-dropzone-desc {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ns-text-muted);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  line-height: 1.5;
 }
 
 .ns-dropzone-actions {
@@ -265,7 +268,7 @@
 }
 
 .ns-sample-link {
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--ns-primary);
   text-decoration: underline;
   cursor: pointer;
@@ -281,9 +284,9 @@
 
 /* Buttons */
 .ns-btn {
-  padding: 10px 20px;
+  padding: 11px 22px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -375,7 +378,7 @@
   background-color: var(--ns-bg-card);
   border: 1px solid var(--ns-border);
   border-radius: 12px;
-  padding: 24px;
+  padding: 26px;
 }
 
 .ns-panel-empty {
@@ -401,17 +404,17 @@
 }
 
 .ns-empty-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--ns-text-title);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .ns-empty-desc {
-  font-size: 13.5px;
+  font-size: 14px;
   color: var(--ns-text-muted);
-  max-width: 220px;
-  line-height: 1.4;
+  max-width: 230px;
+  line-height: 1.55;
 }
 
 /* Results Panel */
@@ -430,18 +433,18 @@
 }
 
 .ns-panel-title {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--ns-text-title);
 }
 
 .ns-demo-badge {
   font-family: var(--ns-font-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--ns-badge-text);
   background-color: var(--ns-badge-bg);
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 4px;
 }
 
@@ -455,10 +458,10 @@
   background-color: var(--ns-bg-dropzone);
   border: 1px solid var(--ns-border);
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .ns-metric-card.full-width {
@@ -466,19 +469,19 @@
 }
 
 .ns-metric-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--ns-text-muted);
 }
 
 .ns-metric-value {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--ns-text-title);
 }
 
 .ns-metric-value.sm {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .ns-detections-section {
@@ -488,7 +491,7 @@
 }
 
 .ns-section-subtitle {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--ns-text-title);
 }
@@ -503,7 +506,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background-color: #f7fcfc;
   border: 1px solid var(--ns-border);
   border-radius: 8px;
@@ -522,16 +525,16 @@
 }
 
 .ns-class-name {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--ns-text-title);
 }
 
 .ns-confidence-badge {
   font-family: var(--ns-font-mono);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
 }
 
@@ -1111,3 +1114,502 @@
     align-items: flex-start;
   }
 }
+
+/* ========================================== */
+/* DASHBOARD PAGE STYLES (.ns-dash-*)         */
+/* ========================================== */
+
+.ns-dash-page {
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+/* Page Header */
+.ns-dash-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ns-dash-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ns-text-title);
+  letter-spacing: -0.2px;
+}
+
+.ns-dash-subtitle {
+  font-size: 13.5px;
+  color: var(--ns-text-muted);
+  margin-top: 4px;
+}
+
+.ns-dash-period-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background-color: var(--ns-bg-card);
+  border: 1px solid var(--ns-border);
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ns-text-title);
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.ns-dash-period-btn:hover {
+  background-color: var(--ns-bg-dropzone);
+}
+
+/* Stat Cards */
+.ns-dash-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.ns-dash-stat-card {
+  background-color: var(--ns-bg-card);
+  border: 1px solid var(--ns-border);
+  border-radius: 12px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.2s ease;
+}
+
+.ns-dash-stat-card:hover {
+  box-shadow: 0 4px 16px rgba(13, 72, 68, 0.06);
+}
+
+.ns-dash-stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.ns-dash-stat-label {
+  font-size: 13px;
+  color: var(--ns-text-muted);
+  font-weight: 500;
+  line-height: 1.3;
+  max-width: 120px;
+}
+
+.ns-dash-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: #e4f5f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2a9d8f;
+  flex-shrink: 0;
+}
+
+.ns-dash-stat-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--ns-text-title);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.ns-dash-stat-unit {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.ns-dash-stat-sub {
+  font-size: 13px;
+  color: var(--ns-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ns-dash-stat-sub.positive {
+  color: #16a349;
+}
+
+/* Generic Dashboard Card */
+.ns-dash-card {
+  background-color: var(--ns-bg-card);
+  border: 1px solid var(--ns-border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ns-dash-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.ns-dash-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ns-text-title);
+}
+
+.ns-dash-card-subtitle {
+  font-size: 13px;
+  color: var(--ns-text-muted);
+  margin-top: 2px;
+}
+
+.ns-dash-more-btn {
+  font-size: 18px;
+  color: var(--ns-text-muted);
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.ns-dash-more-btn:hover {
+  background-color: var(--ns-bg-sidebar);
+}
+
+/* Charts Row */
+.ns-dash-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Trend Chart */
+.ns-dash-trend-card {
+  flex: 1;
+}
+
+.ns-dash-trend-chart-area {
+  width: 100%;
+  min-height: 180px;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Composition Bars */
+.ns-dash-composition-card {
+  overflow: hidden;
+}
+
+.ns-dash-composition-list {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.ns-dash-comp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ns-dash-comp-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ns-dash-comp-label {
+  font-size: 13.5px;
+  color: var(--ns-text-body);
+  font-weight: 500;
+}
+
+.ns-dash-comp-pct {
+  font-family: var(--ns-font-mono);
+  font-size: 12.5px;
+  color: var(--ns-text-muted);
+  font-weight: 600;
+}
+
+.ns-dash-comp-bar-track {
+  width: 100%;
+  height: 7px;
+  background-color: var(--ns-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.ns-dash-comp-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+/* Map Section */
+.ns-dash-bottom-row {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ns-dash-map-card {
+  width: 100%;
+}
+
+.ns-dash-map-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+.ns-dash-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ns-dash-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.ns-dash-legend-label {
+  font-size: 13px;
+  color: var(--ns-text-muted);
+}
+
+.ns-dash-map-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #e3f2f0;
+}
+
+.ns-dash-map-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ns-dash-map-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.ns-dash-pin-outer {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid;
+  background-color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  transition: transform 0.2s;
+}
+
+.ns-dash-map-pin:hover .ns-dash-pin-outer {
+  transform: scale(1.2);
+}
+
+.ns-dash-pin-inner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Recent Analyses Row */
+.ns-dash-analysis-row {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 20px;
+  align-items: start;
+}
+
+.ns-dash-table-card {
+  overflow: hidden;
+}
+
+.ns-dash-viewall-btn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ns-primary);
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.ns-dash-viewall-btn:hover {
+  background-color: var(--ns-badge-bg);
+}
+
+.ns-dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.ns-dash-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ns-text-muted);
+  border-bottom: 1px solid var(--ns-border);
+  white-space: nowrap;
+}
+
+.ns-dash-table td {
+  padding: 14px 12px;
+  color: var(--ns-text-body);
+  border-bottom: 1px solid var(--ns-bg-dropzone);
+  vertical-align: middle;
+}
+
+.ns-dash-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ns-dash-table tbody tr:hover td {
+  background-color: var(--ns-bg-dropzone);
+}
+
+.ns-dash-row-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--ns-text-title) !important;
+  white-space: nowrap;
+}
+
+.ns-dash-thumb-placeholder {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background-color: var(--ns-bg-sidebar);
+  border: 1px solid var(--ns-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ns-dash-type-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background-color: var(--ns-badge-bg);
+  color: var(--ns-badge-text);
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ns-dash-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background-color: #dcfce7;
+  color: #16a349;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* CTA Quick-Start Card */
+.ns-dash-cta-card {
+  background-color: var(--ns-primary);
+  border-radius: 12px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #ffffff;
+}
+
+.ns-dash-cta-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background-color: rgba(156, 234, 216, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ns-dash-cta-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.ns-dash-cta-desc {
+  font-size: 13px;
+  color: #d2f3ed;
+  line-height: 1.45;
+}
+
+.ns-dash-cta-btn {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  transition: background-color 0.2s ease;
+}
+
+.ns-dash-cta-btn:hover {
+  background-color: rgba(255, 255, 255, 0.28);
+}
+
+/* Dashboard Responsive */
+@media (max-width: 1280px) {
+  .ns-dash-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .ns-dash-charts-row {
+    grid-template-columns: 1fr;
+  }
+  .ns-dash-analysis-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .ns-dash-page {
+    padding: 20px;
+  }
+  .ns-dash-stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+

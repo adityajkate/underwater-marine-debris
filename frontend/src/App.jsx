@@ -3,6 +3,7 @@ import LandingPage from './components/LandingPage';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import ImageAnalysisWorkspace from './components/ImageAnalysisWorkspace';
+import Dashboard from './components/Dashboard';
 import './App.css';
 
 export default function App() {
@@ -39,13 +40,17 @@ export default function App() {
         <Header />
 
         {/* Workspace view depending on active navigation tab */}
-        {activeTab === 'image-analysis' ? (
+        {activeTab === 'dashboard' && (
+          <Dashboard onNavigateToAnalysis={handleNavigateToAnalysis} />
+        )}
+        {activeTab === 'image-analysis' && (
           <ImageAnalysisWorkspace />
-        ) : (
+        )}
+        {activeTab !== 'dashboard' && activeTab !== 'image-analysis' && (
           <div className="ns-workspace-layout">
             <div className="ns-card" style={{ padding: '48px', textAlign: 'center', gridColumn: 'span 2' }}>
               <h2 className="ns-page-title" style={{ marginBottom: '12px' }}>
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('-', ' ')}
+                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/-/g, ' ')}
               </h2>
               <p className="ns-page-subtitle">
                 This feature module is queued for future release. Please switch to <strong>Image Analysis</strong>.
