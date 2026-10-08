@@ -1,547 +1,559 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   UploadCloud,
-  BarChart2,
   Download,
-  Eye,
-  EyeOff,
-  RefreshCw,
   AlertCircle,
   FolderOpen,
   Loader2,
   Scan,
-  Volume2,
-  VolumeX,
-  Target
+  RefreshCw,
+  Copy,
+  Check,
+  ShieldAlert,
+  BarChart2,
+  Layers,
+  Sparkles,
+  Sliders,
+  ChevronRight,
+  Eye,
+  CheckCircle2,
+  Clock,
+  Cpu,
 } from 'lucide-react';
+import { useAnalysis } from '../../context/AnalysisContext';
+import { analyzeImage } from '../../services/inferenceService';
+import ImageViewer from '../common/ImageViewer';
+import StatusBadge from '../common/StatusBadge';
+import APP_CONFIG from '../../config/appConfig';
 
-export default function ImageAnalysisWorkbench() {
-  const [selectedImage, setSelectedImage] = useState(null);
+export default function ImageAnalysisWorkbench({ onNavigate }) {
+  const {
+    settings,
+    demoMode,
+    currentAnalysis,
+    setCurrentAnalysis,
+    addHistoryItem,
+    enhancedImageTransfer,
+    setEnhancedImageTransfer,
+    backendStatus,
+  } = useAnalysis();
+
+  const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
-  const [viewMode, setViewMode] = useState('annotated'); // 'annotated' or 'original'
-  const [confidenceThreshold, setConfidenceThreshold] = useState(20);
   const [error, setError] = useState(null);
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [hoveredDetId, setHoveredDetId] = useState(null);
+  const [confidenceFilter, setConfidenceFilter] = useState(settings.defaultConfidenceThreshold || 20);
+  const [imageMeta, setImageMeta] = useState(null);
 
   const fileInputRef = useRef(null);
 
-  // Synthesize an acoustic sonar chime for tactile scan feedback
-  const playSonarPing = () => {
-    if (!soundEnabled) return;
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.32);
-      gain.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.32);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.32);
-    } catch {
-      // Audio autoplay policy handled gracefully
+  // If coming from Underwater Enhancement with an enhanced image:
+  useEffect(() => {
+    if (enhancedImageTransfer) {
+      setPreviewUrl(enhancedImageTransfer.dataUrl);
+      setSelectedFile({
+        name: enhancedImageTransfer.filename || 'enhanced-survey-image.jpg',
+        isEnhanced: true,
+        blob: enhancedImageTransfer.blob,
+      });
+      setAnalysisResult(null);
+      setError(null);
+      setEnhancedImageTransfer(null);
     }
-  };
+  }, [enhancedImageTransfer, setEnhancedImageTransfer]);
 
-  // Handle file selection from user
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
+  // If an analysis was loaded from history/dashboard:
+  useEffect(() => {
+    if (currentAnalysis && currentAnalysis.originalImage && !analysisResult) {
+      setPreviewUrl(currentAnalysis.originalImage);
+      setSelectedFile({
+        name: currentAnalysis.filename,
+        fromHistory: true,
+      });
+      setAnalysisResult(currentAnalysis);
+    }
+  }, [currentAnalysis, analysisResult]);
+
+  // Handle file validation and loading
+  const processImageFile = (file) => {
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image format (JPG, PNG, WebP).');
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|webp)$/i)) {
+      setError('Please select a valid underwater image file (JPG, PNG, WebP).');
+      return;
+    }
+
+    const MAX_SIZE = 25 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setError('Selected image exceeds the 25MB maximum size limit.');
       return;
     }
 
     setError(null);
-    setSelectedImage({
-      file,
-      name: file.name,
-      isCustom: true,
-    });
-    setPreviewUrl(URL.createObjectURL(file));
+    setSelectedFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
     setAnalysisResult(null);
+    setCurrentAnalysis(null);
+
+    const img = new Image();
+    img.onload = () => {
+      setImageMeta({
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+        sizeBytes: file.size,
+      });
+    };
+    img.src = objectUrl;
   };
 
-  // Run AI Analysis
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) processImageFile(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) processImageFile(file);
+  };
+
+  // Run Inference (Calls central inference service)
   const handleAnalyze = async () => {
-    if (!previewUrl) return;
+    if (!previewUrl || (!selectedFile && !enhancedImageTransfer)) return;
 
     setIsAnalyzing(true);
     setError(null);
 
     try {
-      // 1. If user uploaded a custom file, attempt to send to local FastAPI backend if alive
-      if (selectedImage?.file) {
-        try {
-          const formData = new FormData();
-          formData.append('file', selectedImage.file);
+      const result = await analyzeImage(selectedFile || previewUrl, {
+        demoMode,
+        backendUrl: settings.backendUrl,
+        previewUrl,
+        filename: selectedFile?.name || 'Survey_Image.jpg',
+        dimensions: imageMeta || { width: 800, height: 600 },
+      });
 
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000);
+      setAnalysisResult(result);
+      setCurrentAnalysis(result);
 
-          const res = await fetch('http://localhost:8000/predict', {
-            method: 'POST',
-            body: formData,
-            signal: controller.signal,
-          });
-          clearTimeout(timeoutId);
-
-          if (res.ok) {
-            const data = await res.json();
-            if (data.success) {
-              setAnalysisResult({
-                isLiveBackend: true,
-                numDetections: data.num_detections,
-                detections: data.detections,
-                annotatedImage: `data:image/jpeg;base64,${data.annotated_image}`,
-                debrisDensity: data.num_detections > 4 ? 'High Density Zone' : data.num_detections > 1 ? 'Moderate Density' : 'Low Presence',
-                densityScore: (data.num_detections * 0.18).toFixed(2),
-                timestamp: new Date().toLocaleTimeString(),
-              });
-              setIsAnalyzing(false);
-              playSonarPing();
-              return;
-            }
-          }
-        } catch (apiErr) {
-          console.error('FastAPI backend failed:', apiErr);
-          setError(`Cannot reach backend at localhost:8000. Is it running? (${apiErr.message})`);
-          setIsAnalyzing(false);
-          return;
-        }
-      } else {
-        // If no file, just show error
-        setError('Please upload an image first.');
-        setIsAnalyzing(false);
-        return;
+      if (settings.autoSaveHistory) {
+        addHistoryItem({
+          type: 'image',
+          filename: result.filename,
+          numDetections: result.numDetections,
+          detections: result.detections,
+          thumbnail: result.annotatedImage,
+          annotatedImage: result.annotatedImage,
+          originalImage: previewUrl,
+          durationMs: result.durationMs,
+          classBreakdown: result.classBreakdown,
+          isDemo: result.isDemo,
+          rawJson: result.rawJson,
+        });
       }
     } catch (err) {
-      setError('Analysis failed. Please verify the image format and re-attempt.');
+      console.error('Image analysis failed:', err);
+      setError(err.message || 'Image analysis encountered an error.');
+    } finally {
       setIsAnalyzing(false);
     }
   };
 
-  // Filter detections by current confidence threshold
+  // Reset current workspace
+  const handleReset = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setAnalysisResult(null);
+    setError(null);
+    setHoveredDetId(null);
+    setImageMeta(null);
+    setCurrentAnalysis(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // Filter detections by threshold
   const activeDetections = (analysisResult?.detections || []).filter(
-    (d) => d.confidence >= confidenceThreshold
+    (d) => d.confidence >= confidenceFilter
   );
 
   const meanConfidence = activeDetections.length
     ? (
-        activeDetections.reduce((acc, d) => acc + d.confidence, 0) /
+        activeDetections.reduce((sum, d) => sum + d.confidence, 0) /
         activeDetections.length
       ).toFixed(1)
     : 0;
 
-  // Class breakdown
-  const classBreakdown = activeDetections.reduce((acc, d) => {
+  // Real class counts from filtered active detections
+  const activeClassBreakdown = activeDetections.reduce((acc, d) => {
     const cls = d.class || 'plastic';
     acc[cls] = (acc[cls] || 0) + 1;
     return acc;
   }, {});
 
-  // Download telemetry JSON
-  const handleExportTelemetry = () => {
-    if (!analysisResult) return;
-    const telemetry = {
-      imageName: selectedImage?.name || 'Survey_Image',
-      timestamp: new Date().toISOString(),
-      numDetections: activeDetections.length,
-      meanConfidence: `${meanConfidence}%`,
-      debrisDensity: analysisResult.debrisDensity,
-      debrisDensityScore_kg_m2: analysisResult.densityScore,
-      detections: activeDetections,
-    };
-
-    const dataBlob = new Blob([JSON.stringify(telemetry, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `nirmalsagar-telemetry-${Date.now()}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="ns-workbench-stage">
-      {/* Workbench Header */}
+      {/* Header */}
       <div className="ns-workbench-header">
         <div>
-          <h1 className="ns-workbench-title">Image Analysis</h1>
+          <div className="ns-header-title-row">
+            <h1 className="ns-workbench-title">Image Detection</h1>
+            <span className="ns-header-badge">YOLOv11s Detection Engine</span>
+          </div>
           <p className="ns-workbench-subtitle">
-            Upload underwater imagery to detect marine debris.
+            Upload underwater imagery to identify, segment, and localize benthic marine debris.
           </p>
         </div>
+
+        {analysisResult && onNavigate && (
+          <div className="ns-header-actions">
+            <button
+              onClick={() => onNavigate('pollution-analysis')}
+              className="ns-btn-secondary"
+              title="Open Pollution Analysis with these detections"
+            >
+              <ShieldAlert size={15} />
+              Assess Pollution Hazard
+            </button>
+          </div>
+        )}
       </div>
 
+      {/* Error Alert */}
       {error && (
-        <div className="ns-workbench-alert">
-          <AlertCircle size={17} />
-          <span>{error}</span>
+        <div className="ns-workbench-alert" role="alert">
+          <AlertCircle size={18} className="ns-alert-icon" />
+          <div className="ns-alert-text">
+            <strong>Inference Notice:</strong> {error}
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="ns-alert-dismiss"
+            aria-label="Dismiss error"
+          >
+            ×
+          </button>
         </div>
       )}
 
-      {/* Two Column Layout: Main Stage + Telemetry Panel */}
+      {/* Main Grid: Left Upload/Viewer, Right Controls & Results */}
       <div className="ns-workbench-grid">
-        {/* Left Column: Upload & Viewer Stage */}
-        <div className="ns-stage-card">
+        {/* Left Column: Image Ingestion & Visualizer */}
+        <div className="ns-stage-card ns-stage-card-viewer">
           {!previewUrl ? (
-            /* Empty Upload Box (Screenshot 4) */
             <div
               className="ns-upload-box"
               onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                const file = e.dataTransfer.files?.[0];
-                if (file) {
-                  const syntheticEvent = { target: { files: [file] } };
-                  handleFileChange(syntheticEvent);
-                }
-              }}
+              onDrop={handleDrop}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
             >
               <div className="ns-upload-icon-circle">
-                <UploadCloud size={28} strokeWidth={1.75} />
+                <UploadCloud size={32} strokeWidth={1.75} />
               </div>
 
-              <h3 className="ns-upload-title">Upload Underwater Image</h3>
-              <p className="ns-upload-subtitle">Drag and drop or click to upload</p>
+              <h3 className="ns-upload-title">Upload Underwater Survey Image</h3>
+              <p className="ns-upload-subtitle">
+                Drag and drop benthic photograph or click to browse local files
+              </p>
 
-              <div className="ns-upload-btn-group" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="ns-btn-choose"
-                >
-                  Choose Image
-                </button>
-
-                <button
-                  type="button"
-                  disabled={!previewUrl}
-                  className="ns-btn-analyze-disabled"
-                >
-                  <Scan size={15} />
-                  Analyze Image
-                </button>
+              <div className="ns-upload-specs">
+                <span>JPG, PNG, WebP</span>
+                <span>•</span>
+                <span>Up to 25MB</span>
               </div>
+
+              <button
+                type="button"
+                className="ns-btn-secondary ns-btn-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                <FolderOpen size={14} />
+                Browse Files
+              </button>
 
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
+                accept="image/jpeg,image/png,image/webp,image/jpg"
                 onChange={handleFileChange}
+                style={{ display: 'none' }}
+                aria-label="Upload underwater image"
               />
             </div>
           ) : (
-            /* Active Image Stage with Viewer */
-            <div className="ns-active-viewer">
-              {/* Viewer Control Bar */}
-              <div className="ns-viewer-toolbar">
-                <div className="ns-viewer-file-info">
-                  <FolderOpen size={16} strokeWidth={1.8} />
-                  <span className="ns-file-name">{selectedImage?.name}</span>
+            <div className="ns-viewer-wrapper">
+              <ImageViewer
+                originalSrc={previewUrl}
+                annotatedSrc={analysisResult?.annotatedImage}
+                filename={selectedFile?.name || 'Survey_Image.jpg'}
+                detections={activeDetections}
+                hoveredDetId={hoveredDetId}
+                onHoverDet={setHoveredDetId}
+                isAnalyzing={isAnalyzing}
+              />
+
+              {/* Action Bar Below Viewer */}
+              <div className="ns-viewer-bottom-bar">
+                <div className="ns-file-meta-tag">
+                  {imageMeta && (
+                    <span className="ns-file-dim">
+                      {imageMeta.width} × {imageMeta.height} px
+                    </span>
+                  )}
+                  {selectedFile?.isEnhanced && (
+                    <span className="ns-tag-enhanced">Enhanced</span>
+                  )}
                 </div>
 
-                <div className="ns-viewer-actions">
-                  {analysisResult && (
-                    <div className="ns-viewmode-toggle">
-                      <button
-                        onClick={() => setViewMode('annotated')}
-                        className={`ns-mode-btn ${viewMode === 'annotated' ? 'active' : ''}`}
-                      >
-                        <Eye size={14} />
-                        Annotated
-                      </button>
-                      <button
-                        onClick={() => setViewMode('original')}
-                        className={`ns-mode-btn ${viewMode === 'original' ? 'active' : ''}`}
-                      >
-                        <EyeOff size={14} />
-                        Original
-                      </button>
-                    </div>
-                  )}
-
+                <div className="ns-viewer-btn-row">
                   <button
-                    onClick={() => setSoundEnabled(!soundEnabled)}
-                    className={`ns-sound-toggle-btn ${soundEnabled ? 'active' : ''}`}
-                    title={soundEnabled ? 'Sonar Sonification: Active' : 'Sonar Sonification: Muted'}
-                    aria-label={soundEnabled ? 'Mute sonar feedback' : 'Enable sonar feedback'}
-                    aria-pressed={soundEnabled}
-                  >
-                    <div className="ns-icon-swap-container">
-                      <span className={`ns-icon-swap ${soundEnabled ? 'ns-icon-visible' : 'ns-icon-hidden'}`}>
-                        <Volume2 size={15} strokeWidth={2} />
-                      </span>
-                      <span className={`ns-icon-swap ${!soundEnabled ? 'ns-icon-visible' : 'ns-icon-hidden'}`}>
-                        <VolumeX size={15} strokeWidth={2} />
-                      </span>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setPreviewUrl(null);
-                      setSelectedImage(null);
-                      setAnalysisResult(null);
-                      setHoveredDetId(null);
-                    }}
-                    className="ns-reset-btn"
-                    title="Upload different image"
+                    onClick={handleReset}
+                    className="ns-btn-secondary ns-btn-sm"
+                    disabled={isAnalyzing}
+                    type="button"
                   >
                     <RefreshCw size={13} />
-                    New Image
+                    Change Image
                   </button>
 
                   <button
                     onClick={handleAnalyze}
                     disabled={isAnalyzing}
-                    className="ns-btn-analyze-active"
+                    className="ns-btn-primary ns-btn-sm"
+                    type="button"
                   >
                     {isAnalyzing ? (
-                      <Loader2 size={15} className="ns-spin" />
+                      <>
+                        <Loader2 size={13} className="ns-spin" />
+                        Detecting...
+                      </>
                     ) : (
-                      <Scan size={15} />
+                      <>
+                        <Scan size={13} />
+                        {analysisResult ? 'Re-run Detection' : 'Run Detection'}
+                      </>
                     )}
-                    <span>{isAnalyzing ? 'Processing...' : analysisResult ? 'Re-Analyze' : 'Analyze Image'}</span>
                   </button>
                 </div>
-              </div>
-
-              {/* Image Canvas / View Area */}
-              <div className="ns-image-viewport">
-                {/* Viewport Info Banner */}
-                <div className="ns-viewport-hud-banner">
-                  <div className="ns-hud-item">
-                    <span className="ns-hud-label">FILE</span>
-                    <span className="ns-hud-val">{selectedImage?.name || 'Survey Image'}</span>
-                  </div>
-                  <div className="ns-hud-item">
-                    <span className="ns-hud-label">DETECTOR</span>
-                    <span className="ns-hud-val">YOLOv11s</span>
-                  </div>
-                </div>
-
-                {isAnalyzing && (
-                  <div className="ns-scanning-overlay">
-                    <div className="ns-scanner-line" />
-                    <div className="ns-scanner-badge">
-                      <Loader2 size={16} className="ns-spin" />
-                      Processing segmentation model...
-                    </div>
-                  </div>
-                )}
-
-                <img
-                  src={
-                    analysisResult && viewMode === 'annotated' && analysisResult.annotatedImage
-                      ? analysisResult.annotatedImage
-                      : previewUrl
-                  }
-                  alt="Underwater benthic survey plate"
-                  className="ns-display-image"
-                />
-
-                {/* Overlaid bounding boxes with interactive hover & spotlight */}
-                {analysisResult &&
-                  viewMode === 'annotated' &&
-                  !analysisResult.annotatedImage?.startsWith('data:') && (
-                    <div className="ns-detections-overlay">
-                      {activeDetections.map((det, idx) => (
-                        <div
-                          key={idx}
-                          className={`ns-detection-box class-${det.class || 'plastic'} ${
-                            hoveredDetId === det.id ? 'active-spotlight' : ''
-                          }`}
-                          style={{
-                            left: `${15 + (idx * 24) % 65}%`,
-                            top: `${20 + (idx * 18) % 55}%`,
-                            width: `${120 + (idx * 20)}px`,
-                            height: `${80 + (idx * 15)}px`,
-                          }}
-                          onMouseEnter={() => setHoveredDetId(det.id)}
-                          onMouseLeave={() => setHoveredDetId(null)}
-                        >
-                          <span className="ns-box-tag">
-                            {det.label || det.class} • {det.confidence}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
               </div>
             </div>
           )}
         </div>
 
-        {/* Right Column: Telemetry & Results Panel (Screenshot 4) */}
-        <div className="ns-panel-card">
+        {/* Right Column: Control & Detection Telemetry */}
+        <div className="ns-controls-card">
           {!analysisResult ? (
-            /* Screenshot 4: "Waiting for analysis..." empty state */
-            <div className="ns-panel-empty">
-              <div className="ns-empty-icon-box">
-                <BarChart2 size={26} strokeWidth={1.8} />
+            <div className="ns-empty-controls">
+              <div className="ns-empty-controls-inner">
+                <Scan size={36} className="ns-icon-faint" />
+                <h3 className="ns-empty-title">Ready for Inference</h3>
+                <p className="ns-empty-desc">
+                  {previewUrl
+                    ? 'Image loaded. Click "Run Detection" to trigger neural segmentation and identify marine debris.'
+                    : 'Upload an underwater image to begin object detection and pollution classification.'}
+                </p>
+
+                {previewUrl && (
+                  <button
+                    onClick={handleAnalyze}
+                    disabled={isAnalyzing}
+                    className="ns-btn-primary"
+                    style={{ marginTop: 16 }}
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 size={15} className="ns-spin" />
+                        Running Inference...
+                      </>
+                    ) : (
+                      <>
+                        <Scan size={15} />
+                        Run Detection
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
-              <h4 className="ns-empty-title">Waiting for analysis...</h4>
-              <p className="ns-empty-desc">
-                Select an underwater image to begin.
-              </p>
             </div>
           ) : (
-            /* Real-time Telemetry & Assessment */
-            <div className="ns-telemetry-panel">
-              <div className="ns-telemetry-header">
-                <div className="ns-status-badge">
-                  <span className="ns-status-indicator" />
-                  ANALYSIS COMPLETE
+            <div className="ns-results-container">
+              {/* Summary Header */}
+              <div className="ns-results-header">
+                <div className="ns-results-title-group">
+                  <h3 className="ns-results-heading">Detection Summary</h3>
+                  <span className="ns-results-badge">Analysis Complete</span>
                 </div>
-                <span className="ns-timestamp">{analysisResult.timestamp}</span>
+                {analysisResult.durationMs ? (
+                  <span className="ns-results-time">{analysisResult.durationMs}ms</span>
+                ) : null}
               </div>
 
-              {/* Top Metrics Cards */}
-              <div className="ns-metrics-grid">
-                <div className="ns-metric-box">
-                  <span className="ns-metric-label">Objects Detected</span>
-                  <span className="ns-metric-value">{activeDetections.length}</span>
-                </div>
-                <div className="ns-metric-box">
-                  <span className="ns-metric-label">Mean Confidence</span>
-                  <span className="ns-metric-value">{meanConfidence}%</span>
-                </div>
-              </div>
-
-              {/* Debris Density Assessment */}
-              <div className="ns-density-card">
-                <div className="ns-density-top">
-                  <span className="ns-density-label">Debris Density Assessment</span>
-                  <span className="ns-density-score">{analysisResult.densityScore} items/m²</span>
-                </div>
-                <div className="ns-density-title">{analysisResult.debrisDensity}</div>
-              </div>
-
-              {/* Class Breakdown Bars */}
-              <div className="ns-breakdown-section">
-                <h5 className="ns-breakdown-title">Debris by Category</h5>
-
-                <div className="ns-breakdown-item">
-                  <div className="ns-breakdown-info">
-                    <span>Plastic Waste</span>
-                    <span className="ns-breakdown-count">{classBreakdown.plastic || 0}</span>
-                  </div>
-                  <div className="ns-progress-track">
-                    <div
-                      className="ns-progress-bar bar-plastic"
-                      style={{
-                        width: `${
-                          activeDetections.length
-                            ? ((classBreakdown.plastic || 0) / activeDetections.length) * 100
-                            : 0
-                        }%`,
-                      }}
-                    />
-                  </div>
+              {/* 1. Metric Cards Grid (Clean 2-column layout) */}
+              <div className="ns-metrics-summary-grid">
+                <div className="ns-summary-metric-card">
+                  <span className="ns-metric-card-label">OBJECTS DETECTED</span>
+                  <span className="ns-metric-card-value">{activeDetections.length}</span>
                 </div>
 
-                <div className="ns-breakdown-item">
-                  <div className="ns-breakdown-info">
-                    <span>Fishing Gear & Nets</span>
-                    <span className="ns-breakdown-count">{classBreakdown.gear || 0}</span>
-                  </div>
-                  <div className="ns-progress-track">
-                    <div
-                      className="ns-progress-bar bar-gear"
-                      style={{
-                        width: `${
-                          activeDetections.length
-                            ? ((classBreakdown.gear || 0) / activeDetections.length) * 100
-                            : 0
-                        }%`,
-                      }}
-                    />
-                  </div>
+                <div className="ns-summary-metric-card">
+                  <span className="ns-metric-card-label">MEAN CONFIDENCE</span>
+                  <span className="ns-metric-card-value">{meanConfidence}%</span>
                 </div>
 
-                <div className="ns-breakdown-item">
-                  <div className="ns-breakdown-info">
-                    <span>Metal Debris</span>
-                    <span className="ns-breakdown-count">{classBreakdown.metal || 0}</span>
-                  </div>
-                  <div className="ns-progress-track">
-                    <div
-                      className="ns-progress-bar bar-metal"
-                      style={{
-                        width: `${
-                          activeDetections.length
-                            ? ((classBreakdown.metal || 0) / activeDetections.length) * 100
-                            : 0
-                        }%`,
-                      }}
-                    />
-                  </div>
+                <div className="ns-summary-metric-card">
+                  <span className="ns-metric-card-label">PROCESSING TIME</span>
+                  <span className="ns-metric-card-value">
+                    {analysisResult.durationMs
+                      ? `${(analysisResult.durationMs / 1000).toFixed(2)} s`
+                      : '—'}
+                  </span>
+                </div>
+
+                <div className="ns-summary-metric-card">
+                  <span className="ns-metric-card-label">CONFIDENCE FILTER</span>
+                  <span className="ns-metric-card-value">{confidenceFilter}%</span>
+                </div>
+
+                <div className="ns-summary-metric-card ns-metric-card-full">
+                  <span className="ns-metric-card-label">DEBRIS CLASSES</span>
+                  <span className="ns-metric-card-value">
+                    {Object.keys(activeClassBreakdown).length}
+                  </span>
                 </div>
               </div>
 
-              {/* Detected Objects List (Interactive Spotlight) */}
-              {activeDetections.length > 0 && (
-                <div className="ns-target-registry-section">
-                  <h5 className="ns-breakdown-title">Detected Objects</h5>
-                  <div className="ns-target-chips-container">
-                    {activeDetections.map((det) => (
-                      <div
-                        key={det.id}
-                        className={`ns-target-chip-row class-${det.class || 'plastic'} ${
-                          hoveredDetId === det.id ? 'hovered' : ''
-                        }`}
-                        onMouseEnter={() => setHoveredDetId(det.id)}
-                        onMouseLeave={() => setHoveredDetId(null)}
-                      >
-                        <div className="ns-target-chip-left">
-                          <span className={`ns-target-dot class-${det.class || 'plastic'}`} />
-                          <span className="ns-target-chip-label">{det.label || det.class}</span>
-                        </div>
-                        <span className="ns-target-chip-conf">{det.confidence}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Sensitivity Slider */}
-              <div className="ns-slider-control">
-                <div className="ns-slider-header">
-                  <span className="ns-slider-label">Confidence Threshold</span>
-                  <span className="ns-slider-val">{confidenceThreshold}%</span>
+              {/* 2. Confidence Threshold Filter Control */}
+              <div className="ns-threshold-control-card">
+                <div className="ns-threshold-header">
+                  <span className="ns-threshold-label">Confidence Threshold</span>
+                  <span className="ns-threshold-value">{confidenceFilter}%</span>
                 </div>
                 <input
+                  id="conf-slider"
                   type="range"
                   min="5"
-                  max="80"
-                  value={confidenceThreshold}
-                  onChange={(e) => setConfidenceThreshold(Number(e.target.value))}
+                  max="90"
+                  step="5"
+                  value={confidenceFilter}
+                  onChange={(e) => setConfidenceFilter(Number(e.target.value))}
                   className="ns-range-slider"
+                  aria-label="Confidence threshold filter"
                 />
               </div>
 
-              {/* Export Telemetry CTA */}
-              <button
-                onClick={handleExportTelemetry}
-                className="ns-export-btn"
-                title="Download JSON telemetry log"
-              >
-                <Download size={15} />
-                Export Telemetry JSON
-              </button>
+              {/* 3. Class Distribution Breakdown */}
+              <div className="ns-breakdown-section">
+                <h4 className="ns-sub-heading">Class Breakdown</h4>
+                <div className="ns-class-chips-grid">
+                  {Object.entries(activeClassBreakdown).map(([cls, count]) => {
+                    const taxonomy = APP_CONFIG.TAXONOMY[cls] || APP_CONFIG.TAXONOMY.other;
+                    return (
+                      <div
+                        key={cls}
+                        className="ns-class-chip"
+                        style={{ borderLeftColor: taxonomy.color }}
+                      >
+                        <div className="ns-class-chip-info">
+                          <span className="ns-chip-dot" style={{ backgroundColor: taxonomy.color }} />
+                          <span className="ns-chip-name">{taxonomy.label}</span>
+                        </div>
+                        <span className="ns-chip-count">{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 4. Detections Detailed List Table */}
+              <div className="ns-detections-list-section">
+                <div className="ns-detections-header-row">
+                  <h4 className="ns-sub-heading">Segmented Targets</h4>
+                  <span className="ns-table-count-tag">
+                    {activeDetections.length} target{activeDetections.length === 1 ? '' : 's'}
+                  </span>
+                </div>
+
+                {activeDetections.length === 0 ? (
+                  <p className="ns-hint-muted">
+                    No detections meet the {confidenceFilter}% confidence threshold.
+                  </p>
+                ) : (
+                  <div className="ns-det-table-wrapper">
+                    <table className="ns-det-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '36px' }}>#</th>
+                          <th>Class</th>
+                          <th>Confidence</th>
+                          <th style={{ minWidth: '110px' }}>Bounding Box</th>
+                          <th>Threat Level</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeDetections.map((det) => {
+                          const taxonomy = APP_CONFIG.TAXONOMY[det.class] || APP_CONFIG.TAXONOMY.other;
+                          const isHovered = hoveredDetId === det.id;
+                          return (
+                            <tr
+                              key={det.id}
+                              className={isHovered ? 'row-hovered' : ''}
+                              onMouseEnter={() => setHoveredDetId(det.id)}
+                              onMouseLeave={() => setHoveredDetId(null)}
+                            >
+                              <td className="ns-td-index">{det.id}</td>
+                              <td>
+                                <span
+                                  className="ns-det-badge"
+                                  style={{
+                                    backgroundColor: taxonomy.bgTint,
+                                    color: taxonomy.color,
+                                    borderColor: taxonomy.color,
+                                  }}
+                                >
+                                  {taxonomy.shortLabel}
+                                </span>
+                              </td>
+                              <td className="ns-td-conf">
+                                <strong>{det.confidence}%</strong>
+                              </td>
+                              <td className="ns-mono-text">
+                                [{det.bbox.slice(0, 4).join(', ')}]
+                              </td>
+                              <td>
+                                <span className={`ns-threat-tag threat-${det.threatLevel?.toLowerCase() || 'medium'}`}>
+                                  {det.threatLevel || 'Medium'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Assessment Action */}
+              {onNavigate && (
+                <button
+                  onClick={() => onNavigate('pollution-analysis')}
+                  className="ns-btn-primary"
+                  style={{ width: '100%', marginTop: 14 }}
+                >
+                  <ShieldAlert size={15} />
+                  Proceed to Pollution Analysis
+                  <ChevronRight size={15} />
+                </button>
+              )}
             </div>
           )}
         </div>
