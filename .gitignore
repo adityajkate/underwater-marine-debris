@@ -1,0 +1,75 @@
+# ==========================================
+# NirmalSagar — Git Ignore Configuration
+# ==========================================
+
+# --- Node / Frontend ---
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+dist-ssr/
+frontend/dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Python / Bytecode & Caches ---
+__pycache__/
+*/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# --- Virtual Environments ---
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+env/
+ENV/
+
+# --- Heavy Datasets & Raw Archives (Exceeds GitHub limits) ---
+backend/datasets/
+backend/paper/raw/
+*.tar.gz
+*.zip
+*.tar
+*.gz
+*.7z
+*.rar
+
+# --- Large Model Checkpoint Weights (>100MB / Binary weights) ---
+backend/runs/
+*.pt
+*.pth
+*.bin
+*.onnx
+*.engine
+
+# --- Scratch & Temporary Debug Dumps ---
+backend/scratch/
+scratch/
+tmp/
+temp/
+
+# --- IDEs & OS Metadata ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- Antigravity Agent Local Files ---
+skills-lock.json
