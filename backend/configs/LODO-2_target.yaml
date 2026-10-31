@@ -1,0 +1,8 @@
+path: /content/nirmalsagar
+train: /content/nirmalsagar/splits/seaclear_train.txt
+val: /content/nirmalsagar/splits/seaclear_val.txt
+test: /content/nirmalsagar/splits/seaclear_test.txt
+names:
+  0: plastic
+  1: metal
+  2: other_debris

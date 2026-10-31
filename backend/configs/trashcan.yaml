@@ -1,0 +1,8 @@
+path: /content/nirmalsagar
+train: /content/nirmalsagar/splits/trashcan_train.txt
+val: /content/nirmalsagar/splits/trashcan_val.txt
+test: /content/nirmalsagar/splits/trashcan_test.txt
+names:
+  0: plastic
+  1: metal
+  2: other_debris
