@@ -1,0 +1,8 @@
+{
+  "hamming": 5,
+  "n_groups": 1828,
+  "n_cross": 84,
+  "pairs": {
+    "('jamstec', 'trashcan')": 84
+  }
+}
