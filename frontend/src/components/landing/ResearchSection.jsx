@@ -53,16 +53,7 @@ export default function ResearchSection() {
           </div>
         </div>
 
-        {/* Right Column: Photo */}
-        <div className="ns-research-col-right">
-          <div className="ns-research-img-wrapper">
-            <img
-              src="/research-diver.jpg"
-              alt=""
-              className="ns-research-img"
-            />
-          </div>
-        </div>
+
       </div>
     </section>
   );

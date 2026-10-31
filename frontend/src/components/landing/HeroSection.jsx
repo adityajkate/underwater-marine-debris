@@ -13,11 +13,6 @@ export default function HeroSection({ onOpenWorkbench }) {
   return (
     <section className="ns-hero-root">
       <div className="ns-hero-bg">
-        <img
-          src="/hero-underwater-rov.jpg"
-          alt="Autonomous underwater vehicle surveying marine benthic debris"
-          className="ns-hero-img"
-        />
         <div className="ns-hero-overlay" />
       </div>
 
