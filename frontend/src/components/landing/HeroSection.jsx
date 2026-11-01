@@ -21,8 +21,13 @@ export default function HeroSection({ onOpenWorkbench }) {
       <div className="ns-hero-container">
         <div className="ns-hero-content">
           <h1 className="ns-hero-title">
-            Underwater Marine Debris<br />
-            & Plastic Detection
+            <span className="ns-hero-line">Underwater</span>
+            <span className="ns-hero-line ns-hero-line-mid">
+              <span className="ns-hero-highlight-pill">
+                <span className="ns-hero-pill-text">Marine Debris</span>
+              </span>
+            </span>
+            <span className="ns-hero-line">&amp; Plastic Detection</span>
           </h1>
 
           <p className="ns-hero-desc">
