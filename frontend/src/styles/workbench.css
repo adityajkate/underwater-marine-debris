@@ -3231,6 +3231,8 @@
   border: 2px solid #10b981;
   border-radius: 3px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  transition: left 0.12s linear, top 0.12s linear, width 0.12s linear, height 0.12s linear;
+  pointer-events: none;
 }
 
 .ns-video-ann-label {

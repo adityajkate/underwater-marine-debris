@@ -218,22 +218,61 @@ export default function VideoDetectionView({ onNavigate }) {
   const frameWidth = videoMeta?.width || analysisResult?.videoWidth || 16;
   const frameHeight = videoMeta?.height || analysisResult?.videoHeight || 9;
 
-  // Active temporal window — detections are shown while playback is inside it
-  const activeKeyframeIndex = useMemo(() => {
-    const keyframes = analysisResult?.keyframes;
-    if (!keyframes || keyframes.length === 0) return -1;
-    let idx = -1;
-    for (let i = 0; i < keyframes.length; i += 1) {
-      if (currentTime + 0.0001 >= keyframes[i].timestampSec) idx = i;
-    }
-    return idx;
-  }, [analysisResult, currentTime]);
-
+  // Active temporal window with smooth interpolation between keyframes
   const activeDetections = useMemo(() => {
     const keyframes = analysisResult?.keyframes;
-    if (!keyframes || activeKeyframeIndex < 0) return [];
-    return keyframes[activeKeyframeIndex]?.detectedObjects || [];
-  }, [analysisResult, activeKeyframeIndex]);
+    if (!keyframes || keyframes.length === 0) return [];
+
+    // Find the latest keyframe before or at currentTime
+    let curIdx = -1;
+    for (let i = 0; i < keyframes.length; i += 1) {
+      if (currentTime >= keyframes[i].timestampSec - 0.05) {
+        curIdx = i;
+      } else {
+        break;
+      }
+    }
+
+    if (curIdx < 0) curIdx = 0;
+    const curKf = keyframes[curIdx];
+    const nextKf = keyframes[curIdx + 1];
+
+    if (!curKf) return [];
+
+    // If next keyframe exists, smoothly interpolate box coordinates for active tracks
+    if (nextKf && nextKf.timestampSec > curKf.timestampSec && currentTime <= nextKf.timestampSec) {
+      const alpha = Math.max(0, Math.min(1, (currentTime - curKf.timestampSec) / (nextKf.timestampSec - curKf.timestampSec)));
+      const nextMap = new Map();
+      (nextKf.detectedObjects || []).forEach((d) => {
+        nextMap.set(d.trackId || d.id, d);
+      });
+
+      return (curKf.detectedObjects || []).map((det) => {
+        const nextDet = nextMap.get(det.trackId || det.id);
+        if (nextDet && nextDet.bbox && det.bbox) {
+          const [x1_a, y1_a, x2_a, y2_a] = det.bbox;
+          const [x1_b, y1_b, x2_b, y2_b] = nextDet.bbox;
+          return {
+            ...det,
+            bbox: [
+              x1_a + (x1_b - x1_a) * alpha,
+              y1_a + (y1_b - y1_a) * alpha,
+              x2_a + (x2_b - x2_a) * alpha,
+              y2_a + (y2_b - y2_a) * alpha,
+            ],
+          };
+        }
+        return det;
+      });
+    }
+
+    // Persist detections for 1.2s beyond the keyframe before fading
+    if (currentTime > curKf.timestampSec + 1.2) {
+      return [];
+    }
+
+    return curKf.detectedObjects || [];
+  }, [analysisResult, currentTime]);
 
   return (
     <div className="ns-workbench-stage">
@@ -338,16 +377,18 @@ export default function VideoDetectionView({ onNavigate }) {
                     {activeDetections.map((det) => {
                       const taxonomy =
                         APP_CONFIG.TAXONOMY[det.class] || APP_CONFIG.TAXONOMY.other;
-                      const [bx, by, bw, bh] = det.bbox;
+                      const [x1, y1, x2, y2] = det.bbox || [0, 0, 0, 0];
+                      const boxW = Math.max(1, (x2 || 0) - (x1 || 0));
+                      const boxH = Math.max(1, (y2 || 0) - (y1 || 0));
                       return (
                         <div
-                          key={`${activeKeyframeIndex}-${det.id}`}
+                          key={`track-${det.trackId || det.id}`}
                           className="ns-video-ann-box"
                           style={{
-                            left: `${(bx / frameWidth) * 100}%`,
-                            top: `${(by / frameHeight) * 100}%`,
-                            width: `${(bw / frameWidth) * 100}%`,
-                            height: `${(bh / frameHeight) * 100}%`,
+                            left: `${(x1 / frameWidth) * 100}%`,
+                            top: `${(y1 / frameHeight) * 100}%`,
+                            width: `${(boxW / frameWidth) * 100}%`,
+                            height: `${(boxH / frameHeight) * 100}%`,
                             borderColor: taxonomy.color,
                             backgroundColor: `${taxonomy.color}1f`,
                           }}

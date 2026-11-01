@@ -241,8 +241,8 @@ def run_sahi_inference(
         if x_starts[-1] + sz < w:
             x_starts.append(w - sz)
 
-        for y1 in set(y_starts):
-            for x1 in set(x_starts):
+        for y1 in sorted(set(y_starts)):
+            for x1 in sorted(set(x_starts)):
                 crop = infer_base[y1 : y1 + sz, x1 : x1 + sz]
                 for m in active_models:
                     slice_res = m(crop, conf=0.015, iou=0.45, imgsz=sz, verbose=False)[0]
@@ -434,6 +434,18 @@ def predict(
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
+
+def compute_iou(box1, box2):
+    x1 = max(box1[0], box2[0])
+    y1 = max(box1[1], box2[1])
+    x2 = min(box1[2], box2[2])
+    y2 = min(box1[3], box2[3])
+    inter = max(0.0, x2 - x1) * max(0.0, y2 - y1)
+    area1 = max(0.0, box1[2] - box1[0]) * max(0.0, box1[3] - box1[1])
+    area2 = max(0.0, box2[2] - box2[0]) * max(0.0, box2[3] - box2[1])
+    union = area1 + area2 - inter
+    return inter / union if union > 0 else 0.0
+
 @app.post("/predict-video")
 def predict_video(file: UploadFile = File(...)):
     """
@@ -459,7 +471,7 @@ def predict_video(file: UploadFile = File(...)):
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # Sample at ~2 frames per second, capped at max 60 keyframes to guarantee fast inference
+        # Sample at ~2 frames per second, capped at max 60 keyframes
         MAX_KEYFRAMES = 60
         base_step = max(1, int(round(fps / 2.0)))
         if total_frames > 0 and (total_frames // base_step) > MAX_KEYFRAMES:
@@ -472,7 +484,10 @@ def predict_video(file: UploadFile = File(...)):
         total_detections = 0
         frame_idx = 0
 
-        # Read frames sequentially (10-50x faster than random cap.set seeks)
+        # Temporal IoU Tracker to maintain rock-solid, consistent track IDs and stable classes
+        active_tracks = {}
+        next_track_id = 1
+
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -480,36 +495,91 @@ def predict_video(file: UploadFile = File(...)):
 
             if frame_idx % step == 0:
                 timestamp_sec = round(frame_idx / fps, 2)
-                # Video keyframe inference at 640px with verbose=False for fast processing (<50ms/frame)
-                results = model(frame, conf=0.10, imgsz=640, verbose=False)
+                # Filter out erratic low-confidence noise by using conf=0.18
+                results = model(frame, conf=0.18, imgsz=640, verbose=False)
                 result = results[0]
 
-                det_objs = []
+                raw_dets = []
                 if len(result.boxes) > 0:
-                    for b_i, box in enumerate(result.boxes):
+                    for box in result.boxes:
                         cls_id = int(box.cls.item())
                         cls_name = model.names[cls_id]
                         conf_score = float(box.conf.item())
-                        xyxy = box.xyxy[0].cpu().numpy().tolist()
-                        det_objs.append(
-                            {
-                                "id": b_i + 1,
-                                "class": cls_name,
-                                "label": cls_name.title().replace("_", " "),
-                                "confidence": round(conf_score * 100, 1),
-                                "bbox": [round(v, 1) for v in xyxy],
-                            }
-                        )
-                        class_breakdown[cls_name] = class_breakdown.get(cls_name, 0) + 1
-                        total_detections += 1
+                        xyxy = [round(float(v), 1) for v in box.xyxy[0].cpu().numpy().tolist()]
+                        raw_dets.append({
+                            "class": cls_name,
+                            "conf": conf_score,
+                            "bbox": xyxy
+                        })
 
-                keyframes.append(
-                    {
-                        "frame": frame_idx,
-                        "timestampSec": timestamp_sec,
-                        "detections": det_objs,
-                    }
-                )
+                # Associate detections with existing tracks using IoU matching
+                det_objs = []
+                matched_tracks = set()
+
+                for d in raw_dets:
+                    b = d["bbox"]
+                    best_iou = 0.0
+                    best_tid = None
+                    for tid, tr in active_tracks.items():
+                        if tid in matched_tracks:
+                            continue
+                        iou = compute_iou(b, tr["bbox"])
+                        if iou > best_iou:
+                            best_iou = iou
+                            best_tid = tid
+
+                    if best_iou >= 0.25 and best_tid is not None:
+                        # Matched existing track
+                        tr = active_tracks[best_tid]
+                        tr["bbox"] = b
+                        tr["last_seen"] = frame_idx
+                        tr["class_votes"][d["class"]] = tr["class_votes"].get(d["class"], 0) + d["conf"]
+                        # Consensus class prevents class flickering between frames
+                        consensus_cls = max(tr["class_votes"].items(), key=lambda x: x[1])[0]
+
+                        det_objs.append({
+                            "id": best_tid,
+                            "track_id": best_tid,
+                            "class": consensus_cls,
+                            "label": consensus_cls.title().replace("_", " "),
+                            "confidence": round(d["conf"] * 100, 1),
+                            "bbox": b,
+                        })
+                        matched_tracks.add(best_tid)
+                        class_breakdown[consensus_cls] = class_breakdown.get(consensus_cls, 0) + 1
+                    else:
+                        # New track
+                        tid = next_track_id
+                        next_track_id += 1
+                        active_tracks[tid] = {
+                            "bbox": b,
+                            "last_seen": frame_idx,
+                            "class_votes": {d["class"]: d["conf"]}
+                        }
+                        det_objs.append({
+                            "id": tid,
+                            "track_id": tid,
+                            "class": d["class"],
+                            "label": d["class"].title().replace("_", " "),
+                            "confidence": round(d["conf"] * 100, 1),
+                            "bbox": b,
+                        })
+                        matched_tracks.add(tid)
+                        class_breakdown[d["class"]] = class_breakdown.get(d["class"], 0) + 1
+
+                    total_detections += 1
+
+                # Clean up tracks that vanished > 6 frames ago
+                active_tracks = {
+                    tid: tr for tid, tr in active_tracks.items()
+                    if (frame_idx - tr["last_seen"]) <= (step * 4)
+                }
+
+                keyframes.append({
+                    "frame": frame_idx,
+                    "timestampSec": timestamp_sec,
+                    "detections": det_objs,
+                })
 
                 if len(keyframes) >= MAX_KEYFRAMES:
                     break

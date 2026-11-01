@@ -275,8 +275,10 @@ export async function analyzeVideo(videoFile, options = {}) {
 
         const taxonomy = APP_CONFIG.TAXONOMY[cls] || APP_CONFIG.TAXONOMY.other_debris;
         const rawBox = det.bbox || det.box || [0, 0, 0, 0];
+        const trackId = det.track_id || det.trackId || (kfIndex * 10 + i + 1);
         return {
-          id: kfIndex * 10 + i + 1,
+          id: trackId,
+          trackId: trackId,
           class: cls,
           label: taxonomy.label,
           confidence:
