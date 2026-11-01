@@ -12,6 +12,19 @@ export default function LandingFooter() {
           </p>
         </div>
 
+        <div className="ns-footer-center-contributors">
+          <h4 className="ns-footer-heading">Contributors</h4>
+          <p className="ns-footer-contributors-list">
+            <span>Aditya Kate</span>
+            <span className="ns-footer-sep">•</span>
+            <span>Suman Manik</span>
+            <span className="ns-footer-sep">•</span>
+            <span>Tanmay Harmalkar</span>
+            <span className="ns-footer-sep">•</span>
+            <span>Abdullah Khan</span>
+          </p>
+        </div>
+
         <div className="ns-footer-right">
           <p className="ns-footer-copyright">
             © NirmalSagar. All rights reserved.

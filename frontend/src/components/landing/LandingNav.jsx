@@ -40,6 +40,11 @@ export default function LandingNav({ onOpenWorkbench }) {
                 How It Works
               </a>
             </li>
+            <li>
+              <a href="#contributors" onClick={(e) => scrollToSection(e, 'contributors')} className="ns-nav-link">
+                Contributors
+              </a>
+            </li>
           </ul>
         </nav>
 
@@ -67,24 +72,27 @@ export default function LandingNav({ onOpenWorkbench }) {
           </button>
         </div>
 
-      {/* Mobile Drawer */}
-      {mobileOpen && (
-        <div className="ns-nav-mobile-menu">
-          <a href="#about" onClick={(e) => scrollToSection(e, 'about')} className="ns-mobile-link">
-            About
-          </a>
-          <a href="#research" onClick={(e) => scrollToSection(e, 'research')} className="ns-mobile-link">
-            Research
-          </a>
-          <a href="#how-it-works" onClick={(e) => scrollToSection(e, 'how-it-works')} className="ns-mobile-link">
-            How It Works
-          </a>
-          <button onClick={onOpenWorkbench} className="ns-btn-primary" style={{ width: '100%', marginTop: '8px' }}>
-            Analyze Image
-          </button>
-        </div>
-      )}
-    </header>
-  </div>
+        {/* Mobile Drawer */}
+        {mobileOpen && (
+          <div className="ns-nav-mobile-menu">
+            <a href="#about" onClick={(e) => scrollToSection(e, 'about')} className="ns-mobile-link">
+              About
+            </a>
+            <a href="#research" onClick={(e) => scrollToSection(e, 'research')} className="ns-mobile-link">
+              Research
+            </a>
+            <a href="#how-it-works" onClick={(e) => scrollToSection(e, 'how-it-works')} className="ns-mobile-link">
+              How It Works
+            </a>
+            <a href="#contributors" onClick={(e) => scrollToSection(e, 'contributors')} className="ns-mobile-link">
+              Contributors
+            </a>
+            <button onClick={onOpenWorkbench} className="ns-btn-primary" style={{ width: '100%', marginTop: '8px' }}>
+              Analyze Image
+            </button>
+          </div>
+        )}
+      </header>
+    </div>
   );
 }
