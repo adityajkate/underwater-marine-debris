@@ -40,36 +40,31 @@ export default function LandingNav({ onOpenWorkbench }) {
                 How It Works
               </a>
             </li>
-            <li>
-              <a href="#contributors" onClick={(e) => scrollToSection(e, 'contributors')} className="ns-nav-link">
-                Contributors
-              </a>
-            </li>
           </ul>
         </nav>
 
         {/* Right Actions */}
         <div className="ns-nav-right">
-            <button onClick={onOpenWorkbench} className="ns-btn-primary ns-nav-cta" title="Launch Analysis Console">
-              Analyze
-            </button>
+          <button onClick={onOpenWorkbench} className="ns-btn-primary ns-nav-cta" title="Launch Analysis Console">
+            Analyze
+          </button>
 
-            {/* Mobile hamburger with contextual icon cross-fade */}
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="ns-nav-mobile-toggle"
-              aria-label="Toggle Navigation"
-              aria-expanded={mobileOpen}
-            >
-              <div className="ns-icon-swap-container">
-                <span className={`ns-icon-swap ${!mobileOpen ? 'ns-icon-visible' : 'ns-icon-hidden'}`}>
-                  <Menu size={18} strokeWidth={2} />
-                </span>
-                <span className={`ns-icon-swap ${mobileOpen ? 'ns-icon-visible' : 'ns-icon-hidden'}`}>
-                  <X size={18} strokeWidth={2} />
-                </span>
-              </div>
-            </button>
+          {/* Mobile hamburger with contextual icon cross-fade */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="ns-nav-mobile-toggle"
+            aria-label="Toggle Navigation"
+            aria-expanded={mobileOpen}
+          >
+            <div className="ns-icon-swap-container">
+              <span className={`ns-icon-swap ${!mobileOpen ? 'ns-icon-visible' : 'ns-icon-hidden'}`}>
+                <Menu size={18} strokeWidth={2} />
+              </span>
+              <span className={`ns-icon-swap ${mobileOpen ? 'ns-icon-visible' : 'ns-icon-hidden'}`}>
+                <X size={18} strokeWidth={2} />
+              </span>
+            </div>
+          </button>
         </div>
 
         {/* Mobile Drawer */}
@@ -83,9 +78,6 @@ export default function LandingNav({ onOpenWorkbench }) {
             </a>
             <a href="#how-it-works" onClick={(e) => scrollToSection(e, 'how-it-works')} className="ns-mobile-link">
               How It Works
-            </a>
-            <a href="#contributors" onClick={(e) => scrollToSection(e, 'contributors')} className="ns-mobile-link">
-              Contributors
             </a>
             <button onClick={onOpenWorkbench} className="ns-btn-primary" style={{ width: '100%', marginTop: '8px' }}>
               Analyze

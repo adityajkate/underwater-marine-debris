@@ -696,139 +696,6 @@
 }
 
 
-/* 5B. CONTRIBUTORS SECTION */
-.ns-contributors-root {
-  padding: 120px 48px;
-  background: var(--bg-page);
-  position: relative;
-  z-index: 10;
-}
-
-.ns-contributors-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.ns-contributors-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 28px;
-}
-
-.ns-contributor-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: 24px;
-  padding: 36px 30px;
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.ns-contributor-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--teal-primary), #2dd4bf);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.ns-contributor-card:hover {
-  background: var(--bg-card-hover);
-  border-color: rgba(11, 59, 50, 0.16);
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
-}
-
-.ns-contributor-card:hover::before {
-  opacity: 1;
-}
-
-.ns-contributor-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.ns-contributor-avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(45, 212, 191, 0.18));
-  border: 1px solid rgba(15, 118, 110, 0.22);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: var(--teal-primary);
-  letter-spacing: -0.02em;
-}
-
-.ns-contributor-icon-tag {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: rgba(11, 59, 50, 0.04);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  transition: color 0.3s ease, background-color 0.3s ease;
-}
-
-.ns-contributor-card:hover .ns-contributor-icon-tag {
-  background: rgba(15, 118, 110, 0.12);
-  color: var(--teal-primary);
-}
-
-.ns-contributor-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.ns-contributor-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: var(--text-dark);
-  margin-bottom: 6px;
-  letter-spacing: -0.02em;
-}
-
-.ns-contributor-role {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--teal-primary);
-  margin-bottom: 12px;
-}
-
-.ns-role-badge-icon {
-  color: var(--teal-primary);
-}
-
-.ns-contributor-focus {
-  font-size: 0.92rem;
-  color: var(--text-body);
-  line-height: 1.55;
-  margin: 0;
-}
-
 /* Footer Contributors */
 .ns-footer-center-contributors {
   text-align: center;
@@ -856,7 +723,7 @@
   .ns-footer-container { flex-direction: column; gap: 64px; }
   .ns-footer-nav { flex-wrap: wrap; gap: 48px; }
   .ns-hero-root { padding: 120px 24px; }
-  .ns-insights-root, .ns-workflow-root, .ns-research-root, .ns-contributors-root { padding: 80px 24px; }
+  .ns-insights-root, .ns-workflow-root, .ns-research-root { padding: 80px 24px; }
   .ns-footer-center-contributors { text-align: left; }
   .ns-footer-contributors-list { justify-content: flex-start; }
   .ns-cta-root { margin: 80px 24px; padding: 80px 24px; border-radius: 24px; }
