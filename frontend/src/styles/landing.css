@@ -266,23 +266,8 @@
   border: 1.5px solid var(--teal-primary);
   border-radius: 9999px;
   background: rgba(15, 118, 110, 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 
-    0 4px 20px -2px rgba(15, 118, 110, 0.12),
-    inset 0 0 16px rgba(45, 212, 191, 0.08);
   position: relative;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.ns-hero-highlight-pill:hover {
-  background: rgba(15, 118, 110, 0.07);
-  border-color: #14b8a6;
-  box-shadow: 
-    0 8px 24px -2px rgba(15, 118, 110, 0.18),
-    0 0 0 3px rgba(45, 212, 191, 0.15),
-    inset 0 0 20px rgba(45, 212, 191, 0.12);
-  transform: translateY(-2px) scale(1.015);
+  cursor: default;
 }
 
 .ns-hero-pill-text {
