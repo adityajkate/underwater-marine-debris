@@ -212,7 +212,7 @@ export default function ConsoleLayout({ onReturnToLanding }) {
               tabIndex={0}
             >
               <span className="ns-tag-dot" />
-              <span>YOLOv11s • Marine Debris Detection</span>
+              <span className="ns-model-tag-text">YOLOv11s • Marine Debris Detection</span>
             </div>
 
             {/* Live Backend Badge */}
@@ -226,7 +226,7 @@ export default function ConsoleLayout({ onReturnToLanding }) {
               tabIndex={0}
             >
               <span className="ns-badge-dot" />
-              <span>{backendStatus.isOnline ? 'API READY' : 'API OFFLINE'}</span>
+              <span className="ns-status-badge-text">{backendStatus.isOnline ? 'API READY' : 'API OFFLINE'}</span>
             </div>
 
             {/* Settings Trigger */}
@@ -246,7 +246,7 @@ export default function ConsoleLayout({ onReturnToLanding }) {
               title="Return to Home"
             >
               <ArrowLeft size={14} />
-              <span>Exit Console</span>
+              <span className="ns-back-btn-text">Exit Console</span>
             </button>
           </div>
         </header>

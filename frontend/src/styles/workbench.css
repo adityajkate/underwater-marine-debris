@@ -3633,3 +3633,336 @@
   white-space: nowrap;
 }
 
+
+
+/* ==========================================================================
+   COMPREHENSIVE RESPONSIVE SYSTEM (Mobile, Tablet, Desktop)
+   ========================================================================== */
+
+/* 1. Large Tablets & Small Desktops (<= 1100px) */
+@media (max-width: 1100px) {
+  .ns-system-status-banner {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+  .ns-status-banner-divider {
+    display: none;
+  }
+  .ns-status-banner-item {
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(11, 59, 50, 0.06);
+  }
+  .ns-status-banner-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+/* 2. Tablets & Mobile Landscape (<= 900px) */
+@media (max-width: 900px) {
+  /* Prevent horizontal overflow across the console */
+  .ns-console-root {
+    width: 100vw;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .ns-console-main {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Topbar responsive compactness */
+  .ns-demo-global-tag {
+    display: none !important;
+  }
+
+  .ns-console-topbar {
+    padding: 0 16px;
+    height: 56px;
+  }
+
+  /* Page headers on tablet/mobile */
+  .ns-workbench-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .ns-header-actions {
+    width: 100%;
+  }
+
+  .ns-header-actions .ns-btn-primary,
+  .ns-header-actions .ns-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Workbench grid fallback */
+  .ns-workbench-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  /* Panel cards take full width */
+  .ns-panel-card {
+    width: 100%;
+  }
+}
+
+/* 3. Small Tablets & Phones (<= 768px) */
+@media (max-width: 768px) {
+  .ns-console-content {
+    padding: 14px 10px;
+  }
+
+  .ns-workbench-title {
+    font-size: 1.25rem;
+  }
+
+  .ns-workbench-subtitle {
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .ns-dash-split-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Video viewer responsive aspect & controls */
+  .ns-video-frame {
+    width: 100% !important;
+    max-height: 55vh !important;
+  }
+
+  .ns-viewer-wrapper {
+    padding: 8px;
+  }
+
+  /* Bottom bar of image viewer */
+  .ns-viewer-bottom-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .ns-viewer-btn-row {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Enhancement controls */
+  .ns-split-view-container {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+
+  .ns-split-view-pane {
+    min-height: 240px;
+  }
+
+  .ns-split-slider-container {
+    height: min(380px, 50vh) !important;
+  }
+
+  /* Survey metadata banner in Pollution view */
+  .ns-survey-meta-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Modal responsiveness */
+  .ns-modal-card {
+    max-width: 95vw !important;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+}
+
+/* 4. Mobile Phones (<= 640px) */
+@media (max-width: 640px) {
+  /* Topbar ultra-compact */
+  .ns-console-topbar {
+    padding: 0 10px;
+  }
+
+  .ns-breadcrumb-root,
+  .ns-breadcrumb-slash {
+    display: none;
+  }
+
+  .ns-breadcrumb-current {
+    font-size: 0.82rem;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ns-back-btn-text {
+    display: none;
+  }
+
+  .ns-back-landing-btn {
+    padding: 6px 8px;
+  }
+
+  .ns-topbar-status-badge {
+    padding: 4px 8px;
+    font-size: 0.68rem;
+  }
+
+  /* Metric cards stacked */
+  .ns-dash-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .ns-quick-actions-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .ns-stat-card {
+    padding: 14px 16px;
+  }
+
+  .ns-stat-card-value {
+    font-size: 1.5rem;
+    margin: 6px 0 4px 0;
+  }
+
+  /* Recent items activity list */
+  .ns-recent-item {
+    display: grid !important;
+    grid-template-columns: 56px 1fr !important;
+    grid-template-areas:
+      "thumb info"
+      "thumb meta" !important;
+    gap: 6px 12px !important;
+    padding: 10px 0 !important;
+  }
+
+  .ns-recent-thumb-wrap {
+    grid-area: thumb !important;
+    width: 56px !important;
+    height: 44px !important;
+  }
+
+  .ns-recent-info {
+    grid-area: info !important;
+  }
+
+  .ns-recent-meta {
+    grid-area: meta !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  /* Segmented mode buttons scrollable on mobile */
+  .ns-viewmode-segmented {
+    display: flex;
+    overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .ns-viewmode-segmented::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ns-seg-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+
+  /* Video player controls wrap on mobile */
+  .ns-video-controls {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .ns-video-seek {
+    order: 3;
+    width: 100%;
+    flex-basis: 100%;
+    margin-top: 4px;
+  }
+
+  /* Upload box touch target */
+  .ns-upload-box {
+    padding: 32px 14px;
+  }
+
+  .ns-upload-title {
+    font-size: 1.05rem;
+  }
+
+  .ns-upload-subtitle {
+    font-size: 0.8rem;
+  }
+
+  /* Detections table in workbench */
+  .ns-det-table th,
+  .ns-det-table td {
+    padding: 8px 10px;
+    font-size: 0.74rem;
+  }
+
+  /* History action buttons on mobile */
+  .ns-header-btn-group {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .ns-header-btn-group button {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.75rem;
+    padding: 6px 8px;
+  }
+}
+
+/* 5. Extra Small Devices (<= 400px) */
+@media (max-width: 400px) {
+  .ns-console-topbar {
+    padding: 0 8px;
+    gap: 6px;
+  }
+
+  .ns-topbar-right {
+    gap: 6px;
+  }
+
+  .ns-status-badge-text {
+    display: none; /* keep only status dot on tiny devices */
+  }
+
+  .ns-topbar-status-badge {
+    padding: 6px 8px;
+  }
+
+  .ns-topbar-icon-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .ns-back-landing-btn {
+    padding: 5px 7px;
+  }
+
+  .ns-workbench-title {
+    font-size: 1.15rem;
+  }
+}
