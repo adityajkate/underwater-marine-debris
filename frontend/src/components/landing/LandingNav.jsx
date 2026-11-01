@@ -50,8 +50,8 @@ export default function LandingNav({ onOpenWorkbench }) {
 
         {/* Right Actions */}
         <div className="ns-nav-right">
-          <button onClick={onOpenWorkbench} className="ns-btn-primary ns-nav-cta" title="Launch Image Analysis Console">
-            Analyze Image
+          <button onClick={onOpenWorkbench} className="ns-btn-primary ns-nav-cta" title="Launch Analysis Console">
+            Analyze
           </button>
 
           {/* Mobile hamburger with contextual icon cross-fade */}
@@ -88,7 +88,7 @@ export default function LandingNav({ onOpenWorkbench }) {
               Contributors
             </a>
             <button onClick={onOpenWorkbench} className="ns-btn-primary" style={{ width: '100%', marginTop: '8px' }}>
-              Analyze Image
+              Analyze
             </button>
           </div>
         )}

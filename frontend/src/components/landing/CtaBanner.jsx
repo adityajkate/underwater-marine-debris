@@ -18,7 +18,7 @@ export default function CtaBanner({ onOpenWorkbench }) {
             onClick={onOpenWorkbench}
             className="ns-cta-btn"
           >
-            <span>Analyze Image</span>
+            <span>Analyze</span>
             <ArrowRight size={16} />
           </button>
         </div>

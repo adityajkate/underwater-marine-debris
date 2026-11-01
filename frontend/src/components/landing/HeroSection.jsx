@@ -4,16 +4,18 @@ import { ArrowRight } from 'lucide-react';
 export default function HeroSection({ onOpenWorkbench }) {
   const scrollToResearch = (e) => {
     e.preventDefault();
-    const elem = document.getElementById('research');
-    if (elem) {
-      elem.scrollIntoView({ behavior: 'smooth' });
+    const element = document.getElementById('research');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   return (
     <section className="ns-hero-root">
-      <div className="ns-hero-bg">
-        <div className="ns-hero-overlay" />
+      {/* Background Graphic Layer */}
+      <div className="ns-hero-bg-graphic" aria-hidden="true">
+        <div className="ns-hero-glow-sphere" />
+        <div className="ns-hero-grid-mesh" />
       </div>
 
       <div className="ns-hero-container">
@@ -31,9 +33,9 @@ export default function HeroSection({ onOpenWorkbench }) {
             <button
               onClick={onOpenWorkbench}
               className="ns-hero-btn-primary"
-              aria-label="Launch Image Analysis Workbench"
+              aria-label="Launch Workbench"
             >
-              <span>Analyze Image</span>
+              <span>Analyze</span>
               <ArrowRight size={16} strokeWidth={2} />
             </button>
 
