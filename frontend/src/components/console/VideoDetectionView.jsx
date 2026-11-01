@@ -218,30 +218,35 @@ export default function VideoDetectionView({ onNavigate }) {
   const frameWidth = videoMeta?.width || analysisResult?.videoWidth || 16;
   const frameHeight = videoMeta?.height || analysisResult?.videoHeight || 9;
 
-  // Active temporal window with smooth interpolation between keyframes
-  const activeDetections = useMemo(() => {
+  // Active temporal keyframe index based on playback currentTime
+  const activeKeyframeIndex = useMemo(() => {
     const keyframes = analysisResult?.keyframes;
-    if (!keyframes || keyframes.length === 0) return [];
-
-    // Find the latest keyframe before or at currentTime
-    let curIdx = -1;
+    if (!keyframes || keyframes.length === 0) return -1;
+    let idx = -1;
     for (let i = 0; i < keyframes.length; i += 1) {
       if (currentTime >= keyframes[i].timestampSec - 0.05) {
-        curIdx = i;
+        idx = i;
       } else {
         break;
       }
     }
+    return idx;
+  }, [analysisResult, currentTime]);
 
-    if (curIdx < 0) curIdx = 0;
-    const curKf = keyframes[curIdx];
-    const nextKf = keyframes[curIdx + 1];
+  // Active temporal window with smooth interpolation between keyframes
+  const activeDetections = useMemo(() => {
+    const keyframes = analysisResult?.keyframes;
+    if (!keyframes || keyframes.length === 0 || activeKeyframeIndex < 0) return [];
+
+    const curKf = keyframes[activeKeyframeIndex];
+    const nextKf = keyframes[activeKeyframeIndex + 1];
 
     if (!curKf) return [];
 
     // If next keyframe exists, smoothly interpolate box coordinates for active tracks
     if (nextKf && nextKf.timestampSec > curKf.timestampSec && currentTime <= nextKf.timestampSec) {
-      const alpha = Math.max(0, Math.min(1, (currentTime - curKf.timestampSec) / (nextKf.timestampSec - curKf.timestampSec)));
+      const duration = nextKf.timestampSec - curKf.timestampSec;
+      const alpha = duration > 0 ? Math.max(0, Math.min(1, (currentTime - curKf.timestampSec) / duration)) : 0;
       const nextMap = new Map();
       (nextKf.detectedObjects || []).forEach((d) => {
         nextMap.set(d.trackId || d.id, d);
@@ -272,7 +277,7 @@ export default function VideoDetectionView({ onNavigate }) {
     }
 
     return curKf.detectedObjects || [];
-  }, [analysisResult, currentTime]);
+  }, [analysisResult, activeKeyframeIndex, currentTime]);
 
   return (
     <div className="ns-workbench-stage">
@@ -624,13 +629,14 @@ export default function VideoDetectionView({ onNavigate }) {
                 <div className="ns-detections-header-row">
                   <h4 className="ns-sub-heading">Detection Timeline</h4>
                   <span className="ns-table-count-tag">
-                    {analysisResult.keyframes.length} window
+                    {(analysisResult.keyframes || []).length} window
                     {analysisResult.keyframes.length === 1 ? '' : 's'}
                   </span>
                 </div>
                 <div className="ns-timeline-keyframes-list">
                   {analysisResult.keyframes.map((kf, idx) => {
                     const isActive = activeKeyframeIndex === idx;
+                    const detectedObjs = kf.detectedObjects || [];
                     return (
                       <div
                         key={`${kf.timecode}-${idx}`}
@@ -646,18 +652,18 @@ export default function VideoDetectionView({ onNavigate }) {
                             {kf.timecode}
                           </span>
                           <span className="ns-keyframe-count">
-                            {kf.detectedObjects.length} object
+                            {detectedObjs.length} object
                             {kf.detectedObjects.length === 1 ? '' : 's'}
                           </span>
                         </div>
 
                         <div className="ns-keyframe-objects">
-                          {kf.detectedObjects.map((obj) => {
+                          {detectedObjs.map((obj, oIdx) => {
                             const taxonomy =
                               APP_CONFIG.TAXONOMY[obj.class] || APP_CONFIG.TAXONOMY.other;
                             return (
                               <span
-                                key={obj.id}
+                                key={obj.trackId || obj.id || oIdx}
                                 className="ns-kf-obj-pill"
                                 style={{
                                   backgroundColor: taxonomy.bgTint,
