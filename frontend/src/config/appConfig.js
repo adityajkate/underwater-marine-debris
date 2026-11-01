@@ -29,7 +29,8 @@ export const APP_CONFIG = {
     PREDICT_IMAGE_ENDPOINT: 'http://localhost:8000/predict',
     PREDICT_VIDEO_ENDPOINT: 'http://localhost:8000/predict-video',
     HEALTH_ENDPOINT: 'http://localhost:8000',
-    TIMEOUT_MS: 45000,
+    TIMEOUT_MS: 60000,
+    VIDEO_TIMEOUT_MS: 180000,
   },
 
   // Marine Debris Core-3 Taxonomy Definition

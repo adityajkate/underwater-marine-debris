@@ -140,7 +140,10 @@ export async function analyzeImage(imageFile, options = {}) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), APP_CONFIG.API.TIMEOUT_MS);
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    options.timeoutMs || APP_CONFIG.API.VIDEO_TIMEOUT_MS || 180000
+  );
 
   try {
     let endpoint = backendUrl;
@@ -230,7 +233,10 @@ export async function analyzeVideo(videoFile, options = {}) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), APP_CONFIG.API.TIMEOUT_MS);
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    options.timeoutMs || APP_CONFIG.API.VIDEO_TIMEOUT_MS || 180000
+  );
 
   try {
     const response = await fetch(APP_CONFIG.API.PREDICT_VIDEO_ENDPOINT, {

@@ -81,7 +81,7 @@ export function AnalysisProvider({ children }) {
     try {
       const baseUrl = (settings.backendUrl || APP_CONFIG.API.PREDICT_IMAGE_ENDPOINT).replace(/\/predict\/?$/, '');
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       const res = await fetch(baseUrl || APP_CONFIG.API.BASE_URL, {
         method: 'GET',

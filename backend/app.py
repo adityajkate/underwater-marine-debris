@@ -313,7 +313,7 @@ def run_sahi_inference(
 
 
 @app.post("/predict")
-async def predict(
+def predict(
     file: UploadFile = File(...),
     enhance: bool = False,
     sahi: bool = True,
@@ -334,7 +334,7 @@ async def predict(
 
     try:
         # Read and decode uploaded image
-        contents = await file.read()
+        contents = file.file.read()
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
@@ -435,7 +435,7 @@ async def predict(
 
 
 @app.post("/predict-video")
-async def predict_video(file: UploadFile = File(...)):
+def predict_video(file: UploadFile = File(...)):
     """
     Accepts an underwater video, samples frames at 2 FPS, runs YOLO model
     on each frame, and returns real keyframe detections and summary statistics.
@@ -448,7 +448,7 @@ async def predict_video(file: UploadFile = File(...)):
 
     suffix = pathlib.Path(file.filename).suffix or ".mp4"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        tmp.write(await file.read())
+        tmp.write(file.file.read())
         tmp_path = tmp.name
 
     try:
@@ -459,49 +459,62 @@ async def predict_video(file: UploadFile = File(...)):
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # Sample at ~2 frames per second
-        step = max(1, int(fps / 2))
+        # Sample at ~2 frames per second, capped at max 60 keyframes to guarantee fast inference
+        MAX_KEYFRAMES = 60
+        base_step = max(1, int(round(fps / 2.0)))
+        if total_frames > 0 and (total_frames // base_step) > MAX_KEYFRAMES:
+            step = max(base_step, total_frames // MAX_KEYFRAMES)
+        else:
+            step = base_step
+
         keyframes = []
         class_breakdown = {}
         total_detections = 0
         frame_idx = 0
 
-        while cap.isOpened() and frame_idx < total_frames:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+        # Read frames sequentially (10-50x faster than random cap.set seeks)
+        while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
 
-            timestamp_sec = round(frame_idx / fps, 2)
-            results = model(frame, conf=0.10, imgsz=1024)
-            result = results[0]
+            if frame_idx % step == 0:
+                timestamp_sec = round(frame_idx / fps, 2)
+                # Video keyframe inference at 640px with verbose=False for fast processing (<50ms/frame)
+                results = model(frame, conf=0.10, imgsz=640, verbose=False)
+                result = results[0]
 
-            det_objs = []
-            if len(result.boxes) > 0:
-                for b_i, box in enumerate(result.boxes):
-                    cls_id = int(box.cls.item())
-                    cls_name = model.names[cls_id]
-                    conf = float(box.conf.item())
-                    xyxy = box.xyxy[0].cpu().numpy().tolist()
-                    det_objs.append(
-                        {
-                            "id": b_i + 1,
-                            "class": cls_name,
-                            "confidence": round(conf * 100, 1),
-                            "bbox": [round(v, 1) for v in xyxy],
-                        }
-                    )
-                    class_breakdown[cls_name] = class_breakdown.get(cls_name, 0) + 1
-                    total_detections += 1
+                det_objs = []
+                if len(result.boxes) > 0:
+                    for b_i, box in enumerate(result.boxes):
+                        cls_id = int(box.cls.item())
+                        cls_name = model.names[cls_id]
+                        conf_score = float(box.conf.item())
+                        xyxy = box.xyxy[0].cpu().numpy().tolist()
+                        det_objs.append(
+                            {
+                                "id": b_i + 1,
+                                "class": cls_name,
+                                "label": cls_name.title().replace("_", " "),
+                                "confidence": round(conf_score * 100, 1),
+                                "bbox": [round(v, 1) for v in xyxy],
+                            }
+                        )
+                        class_breakdown[cls_name] = class_breakdown.get(cls_name, 0) + 1
+                        total_detections += 1
 
-            keyframes.append(
-                {
-                    "frame": frame_idx,
-                    "timestampSec": timestamp_sec,
-                    "detections": det_objs,
-                }
-            )
-            frame_idx += step
+                keyframes.append(
+                    {
+                        "frame": frame_idx,
+                        "timestampSec": timestamp_sec,
+                        "detections": det_objs,
+                    }
+                )
+
+                if len(keyframes) >= MAX_KEYFRAMES:
+                    break
+
+            frame_idx += 1
 
         cap.release()
 
