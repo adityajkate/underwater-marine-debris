@@ -49,7 +49,7 @@ flowchart TD
     H --> H2["Benthic Ecological Hazard Index: EHI (0–100 scale)"]
     H --> H3["Material Distribution & Remediation Urgency Profiling"]
     
-    H --> I["React 19 Console Workbench\n(Interactive Viewer, Timeline Scrubbing, JSON Telemetry Export)"]
+    H --> I["React 19/Vite Console Workbench\n(Interactive Viewer, Timeline Scrubbing, JSON Telemetry Export)"]
 ```
 
 ---
