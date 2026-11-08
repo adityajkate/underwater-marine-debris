@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌊 NirmalSagar: Autonomous Underwater Marine Debris Detection & Benthic Pollution Analysis
+# NirmalSagar: Autonomous Underwater Marine Debris Detection & Benthic Pollution Analysis
 
 **AI-Powered Optical Localization, Turbidity-Invariant Enhancement, and Ecological Risk Telemetry for Submerged Marine Litter**
 
